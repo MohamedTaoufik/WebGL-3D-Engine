@@ -57,6 +57,8 @@ export class OrbitControls {
         domElement,
         on_before_render
     ) {
+        addEventListener('contextmenu', (e) => { e.stopPropagation(); e.preventDefault() })
+        
         domElement.style.touchAction = 'none'
 
         const target = new Vector3(0, 0, 0)

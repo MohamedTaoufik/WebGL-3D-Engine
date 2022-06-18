@@ -10,15 +10,15 @@ export class F extends Object3D_Abstract {
      * 
      * @param {Program} program 
      */
-    constructor(program) {
-        super(program, {
-            a_position: f_attribute_position,
-            a_normal: f_attribute_normal
-        })
+    constructor(program, attributes = {
+        a_position: f_attribute_position,
+        a_normal: f_attribute_normal,
+    }) {
+        super(program, attributes)
 
         /** @type {Matrix4} */
         this.worldMatrix = program.material.uniforms.worldMatrix.clone()
-        this.worldMatrix.makeScale(0.01, 0.01, 0.01)        
+        this.worldMatrix.makeScale(0.01, 0.01, 0.01)
 
         const uniform_setters = program.uniform_setters
 

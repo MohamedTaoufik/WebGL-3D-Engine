@@ -20,9 +20,9 @@ new OrbitControls(renderer.camera, renderer.canvas, renderer.on_before_render)
 // container.style.top = '0'
 // container.style.left = '0'
 // document.body.appendChild(container)
-// const cursor_x = new Cursor_View('pos X', (value) => { cam.position.x = value })
-// const cursor_y = new Cursor_View('pos Y', (value) => { cam.position.y = value })
-// const cursor_z = new Cursor_View('pos Z', (value) => { cam.position.z = value })
+// const cursor_x = new Cursor_View('cam pos X', (value) => { cam.position.x = value })
+// const cursor_y = new Cursor_View('cam pos Y', (value) => { cam.position.y = value })
+// const cursor_z = new Cursor_View('cam pos Z', (value) => { cam.position.z = value })
 // container.append(cursor_x.container, cursor_y.container, cursor_z.container)
 
 const program = new Program(renderer, test_mat)
@@ -30,5 +30,3 @@ const program = new Program(renderer, test_mat)
 new F(program)
 
 new Loop(renderer.draw)
-
-addEventListener('contextmenu', (e) => { e.stopPropagation(); e.preventDefault() })
