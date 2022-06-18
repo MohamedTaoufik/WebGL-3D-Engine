@@ -1,0 +1,26 @@
+{
+    "files.exclude": {
+        "**/.gitignore": true,
+        "**/.git": true,
+        "**/package-lock.json": true,
+        "**/package.json": true,
+        "**/node_modules": true,
+        "**/favicon.ico": true,
+        "**/**.blend1": true,
+        "**/jsconfig.json": true,
+        "**/env.js": true,
+
+        "**/build": true,
+        "**/builder": true,
+
+        "**/manifest.webmanifest": true,
+        "**/sw.js": true,
+        "**/version.txt": true,
+    },
+    "svg.preview.background": "editor",
+    "editor.lineHeight": 1.65,
+    "js/ts.implicitProjectConfig.checkJs": true,
+    "terminal.integrated.cwd": "${fileDirname}",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "editor.folding": false
+}
