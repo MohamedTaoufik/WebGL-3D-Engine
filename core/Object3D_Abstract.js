@@ -4,25 +4,22 @@
 export class Object3D_Abstract {
     /**
      * 
-     * @param {Material} material 
+     * @param {Program} program 
      * @param {Object.<string, TypedArray>} attributes 
      */
-    constructor(material, attributes = {}) {
+    constructor(program, attributes = {}, indices) {
 
-        const a = material.getAttributes(attributes)
+        const a = program.getAttributes(attributes, indices)
         this.vao = a.vao
         this.attributes_update = a.attributes_update
 
         this.attributes = attributes
 
-
-        this.drawArrayCount = attributes.a_position.length / 3
-
-        material.objects.add(this)
+        program.objects.add(this)
 
         this.super_dispose = () => {
 
-            material.objects.delete(this)
+            program.objects.delete(this)
 
         }
     }

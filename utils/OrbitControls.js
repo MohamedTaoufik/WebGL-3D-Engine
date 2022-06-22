@@ -58,7 +58,7 @@ export class OrbitControls {
         on_before_render
     ) {
         addEventListener('contextmenu', (e) => { e.stopPropagation(); e.preventDefault() })
-        
+
         domElement.style.touchAction = 'none'
 
         const target = new Vector3(0, 0, 0)
@@ -77,6 +77,8 @@ export class OrbitControls {
 
         const update = (dt) => {
             // const dt = Math.min(THR.dt * 5, 1)
+
+            if (camera.needsUpdate !== true) return
 
             if (pan.x !== 0 || pan.y !== 0) {
 
@@ -102,7 +104,7 @@ export class OrbitControls {
             cam_p.copy(target).add(direction)
 
             camera.lookAt(target)
-            camera.projectionViewMatrixNeedsUpdate = true
+
         }
 
         const last_mouse_position = new Vector2()
@@ -117,10 +119,12 @@ export class OrbitControls {
                     .sub(last_mouse_position)
             }
             last_mouse_position.set(e.clientX, e.clientY)
+            camera.needsUpdate = true
         }
 
         const on_wheel = (e) => {
             spherical.radius += e.deltaY / 1000
+            camera.needsUpdate = true
         }
         addEventListener('wheel', on_wheel)
 
@@ -133,6 +137,7 @@ export class OrbitControls {
 
         const on_lostpointercapture = () => {
             domElement.removeEventListener('pointermove', on_pointermove)
+            camera.needsUpdate = true
         }
         domElement.addEventListener('lostpointercapture', on_lostpointercapture)
 

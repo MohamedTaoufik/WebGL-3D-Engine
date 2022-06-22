@@ -1,3 +1,5 @@
+import { NO_BLENDING } from './Renderer.js'
+
 
 export class Material {
 
@@ -9,13 +11,31 @@ export class Material {
      * @param {string} fragmentShader 
      */
     constructor(
-        attributes, uniforms,
-        vertexShader, fragmentShader,
+        options = {
+            /** @type {Object.<string, Attribute>} */
+            attributes: {},
+            /** @type {Object.<string, Number | Vector2 | Vector3 | Vector4 | Matrix4>} */
+            uniforms: {},
+            vertexShader: ``,
+            fragmentShader: ``,
+
+            blending: NO_BLENDING,
+            init: async () => { },
+            destroy: () => { },
+
+            depth_test: true,
+            depth_write: true,
+        }
     ) {
-        this.vertexShader = vertexShader
-        this.fragmentShader = fragmentShader
-        this.uniforms = uniforms
-        this.attributes = attributes
+        this.vertexShader = options.vertexShader
+        this.fragmentShader = options.fragmentShader
+        this.uniforms = options.uniforms ?? {}
+        this.attributes = options.attributes ?? {}
+        this.blending = options.blending ?? NO_BLENDING
+        this.init = options.init
+        this.destroy = options.destroy
+        this.depth_test = options.depth_test ?? true
+        this.depth_write = options.depth_write ?? true
     }
 }
 

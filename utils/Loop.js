@@ -12,7 +12,7 @@ export class Loop {
         const on_raf = (now_ms) => {
             const now_s = now_ms / 1000
             const dt = Math_min(now_s - last, min_dt)
-            last = this.now
+            last = now_s
 
             update(dt)
 
