@@ -2,8 +2,6 @@
 
 This is an attempt to get an alternative from Three JS. This 3D Engine can be more performant than Three JS but needs some knowledge in WebGL and a good understanding of the memory management and uniforms/attributes update.
 
-![](https://youtube.com/shorts/FFMIUob5E1A)
-
 ## Knowledges
 
 One free way (and what I have done) to get knowledges is:
