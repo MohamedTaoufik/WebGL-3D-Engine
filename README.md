@@ -85,7 +85,7 @@ void main() {
 
 I'm looking for a job.
 
-https://www.twitch.tv/pyompy
-https://tipeee.com/pyompy
-https://twitter.com/nicolas_gayet
+- https://www.twitch.tv/pyompy  
+- https://tipeee.com/pyompy  
+- https://twitter.com/nicolas_gayet 
 
