@@ -1,7 +1,7 @@
 
 
 
-import { PI05 } from '../math/MathUtils.js'
+import { PI, PI05 } from '../math/MathUtils.js'
 import { PI2 } from '../math/MathUtils.js'
 import { Spherical } from '../math/Spherical.js'
 import { Vector2 } from '../math/Vector2.js'
@@ -50,12 +50,12 @@ export class OrbitControls {
      * @param {Camera} camera 
      * @param {HTMLCanvasElement} domElement 
      * @param {Vector3} target 
-     * @param {Set<function>} on_before_render 
+     * @param {Set<function>} onBeforeRender 
      */
     constructor(
         camera,
         domElement,
-        on_before_render
+        onBeforeRender
     ) {
         addEventListener('contextmenu', (e) => { e.stopPropagation(); e.preventDefault() })
 
@@ -64,11 +64,11 @@ export class OrbitControls {
         const target = new Vector3(0, 0, 0)
         this.target = target
 
-        const spherical = new Spherical(10, -PI05, 0)
+        const spherical = new Spherical(10, -1, 4)
         const direction = new Vector3()
 
         // const cam_p = camera.position
-        const cam_p = camera.worldCameraMatrix.position
+        const cam_p = camera.position
 
         const pan = new Vector2()
 
@@ -123,7 +123,7 @@ export class OrbitControls {
         }
 
         const on_wheel = (e) => {
-            spherical.radius += e.deltaY / 1000
+            spherical.radius += e.deltaY / 100
             camera.needsUpdate = true
         }
         addEventListener('wheel', on_wheel)
@@ -141,10 +141,10 @@ export class OrbitControls {
         }
         domElement.addEventListener('lostpointercapture', on_lostpointercapture)
 
-        on_before_render.add(update)
+        onBeforeRender.add(update)
 
         this.dispose = () => {
-            on_before_render.delete(update)
+            onBeforeRender.delete(update)
             domElement.removeEventListener('pointerdown', on_pointerdown)
             domElement.removeEventListener('lostpointercapture', on_lostpointercapture)
             removeEventListener('wheel', on_wheel)

@@ -1,13 +1,14 @@
 
-import { DEG2RAD } from '../math/MathUtils.js'
-import { Matrix4 } from '../math/Matrix4.js'
-import { Vector3, _up } from '../math/Vector3.js'
+import { DEG2RAD } from '../../math/MathUtils.js'
+import { Matrix4 } from '../../math/Matrix4.js'
+import { Vector3, _up } from '../../math/Vector3.js'
 
 const vs_pars = `
 uniform UBO_camera {
     mat4 u_projectionViewMatrix;
-    mat4 u_worldCameraMatrix;
     mat4 u_viewMatrix;
+    vec3 u_cameraPosition;
+    // mat4 u_worldCameraMatrix;
 };
 `
 
@@ -37,7 +38,7 @@ export class Camera {
         this.viewMatrix = new Matrix4()
         this.projectionViewMatrix = new Matrix4()
 
-        this.position = this.worldCameraMatrix.position
+        this.position = new Vector3()
 
         this.lookAt = (x, y, z) => {
             if (x.constructor === Vector3) {
@@ -58,6 +59,9 @@ export class Camera {
         gl.bindBufferBase(gl.UNIFORM_BUFFER, this.UBO_index, UBO_buffer)
 
         this.update_projectionViewMatrix = () => {
+            this.worldCameraMatrix.elements[12] = this.position.x
+            this.worldCameraMatrix.elements[13] = this.position.y
+            this.worldCameraMatrix.elements[14] = this.position.z
 
             this.viewMatrix
                 .copy(this.worldCameraMatrix)
@@ -67,40 +71,13 @@ export class Camera {
                 .premultiply(this.projectionMatrix)
 
             this.projectionViewMatrix.toArray(UBO_data)
-            this.worldCameraMatrix.toArray(UBO_data, 16)
-            this.viewMatrix.toArray(UBO_data, 32)
+            this.viewMatrix.toArray(UBO_data, 16)
+            this.position.toArray(UBO_data, 32)
 
             gl.bindBuffer(gl.UNIFORM_BUFFER, UBO_buffer)
             gl.bufferData(gl.UNIFORM_BUFFER, UBO_data, gl.DYNAMIC_DRAW)
             gl.bindBufferBase(gl.UNIFORM_BUFFER, this.UBO_index, UBO_buffer)
-
         }
-
-        // if (this.camera.needsUpdate === true) {
-        //     this.uniform_setters['projectionViewMatrix'](this.camera.projectionViewMatrix)
-        //     this.uniform_setters['worldCameraMatrix'](this.camera.worldCameraMatrix)
-        //     this.uniform_setters['viewMatrix'](this.camera.worldCameraMatrix)
-        // }
-        // {
-        //     const location = gl.getUniformLocation(program, 'projectionViewMatrix')
-        //     this.uniform_setters['projectionViewMatrix'] = gl_uniform_type[Matrix4](gl, location)
-        //     this.uniform_setters['projectionViewMatrix'](camera.projectionViewMatrix)
-        // } {
-        //     const location = gl.getUniformLocation(program, 'worldCameraMatrix')
-        //     this.uniform_setters['worldCameraMatrix'] = gl_uniform_type[Matrix4](gl, location)
-        //     this.uniform_setters['worldCameraMatrix'](camera.worldCameraMatrix)
-        // } {
-        //     const location = gl.getUniformLocation(program, 'viewMatrix')
-        //     this.uniform_setters['viewMatrix'] = gl_uniform_type[Matrix4](gl, location)
-        //     this.uniform_setters['viewMatrix'](camera.worldCameraMatrix)
-        // }
-
-
-
-
-
-
-
     }
 
     updateProjectionMatrix() {

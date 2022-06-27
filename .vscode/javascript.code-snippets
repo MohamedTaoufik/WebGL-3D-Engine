@@ -57,6 +57,16 @@
         ],
         "description": "for"
     },
+    "forin": {
+        "prefix": "forin",
+        "body": [
+            "for (const key in $1) {",
+            "    const value = $1[key]",
+            "    $0",
+            "}",
+        ],
+        "description": "for"
+    },
     "keydown": {
         "prefix": "keydown",
         "body": [
@@ -109,5 +119,4 @@
         ],
         "description": "check Array integrity"
     },
-    
 }

@@ -1,3 +1,4 @@
+import { CanvasRecorder } from '../utils/CanvasRecorder.js'
 
 
 
@@ -30,6 +31,13 @@ export class Cursor_View {
         on_input()
         input.addEventListener('input', on_input)
 
+
+        const recorder = new CanvasRecorder(renderer.canvas)
+
+        const button = document.createElement('button')
+        button.innerHTML = 'Record'
+
+        
     }
 }
 

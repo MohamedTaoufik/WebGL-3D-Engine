@@ -74,8 +74,13 @@ class GLBinaryData {
 }
 
 const TYPE_CLASS = {
-    [5126]: Float32Array,
-    [5123]: Uint16Array,
+    '5120': Int8Array,    // gl.BYTE
+    '5121': Uint8Array,   // gl.UNSIGNED_BYTE
+    '5122': Int16Array,   // gl.SHORT
+    '5123': Uint16Array,  // gl.UNSIGNED_SHORT
+    '5124': Int32Array,   // gl.INT
+    '5125': Uint32Array,  // gl.UNSIGNED_INT
+    '5126': Float32Array, // gl.FLOAT
 }
 
 const getTypedArrayFromBinary = (accessors, bufferViews, binary, indice) => {
@@ -103,56 +108,131 @@ export class GLBLoader {
         )
 
         const gltf = new GLBinaryData(bin.buffer)
+        console.log(gltf)
 
-        const gltf_nodes = gltf.content.nodes
-        const gltf_meshes = gltf.content.meshes
-        const gltf_accessors = gltf.content.accessors
-        const gltf_bufferViews = gltf.content.bufferViews
-        const gltf_uint8array = new Uint8Array(gltf.body)
+        const body = gltf.body
+        const content = gltf.content
+
+        // accessors
+        const accessors = content.accessors
+        const bufferViews = content.bufferViews
+        for (const accessor of accessors) {
+            const bufferView = bufferViews[accessor.bufferView]
+            accessor.buffer = new TYPE_CLASS[accessor.componentType](
+                body.slice(bufferView.byteOffset, bufferView.byteOffset + bufferView.byteLength)
+            )
+            delete accessor.componentType
+            delete accessor.bufferView
+        }
+
+        // animation
+        if (content.animations) {
+            for (const animation of content.animations) {
+                const channels = animation.channels
+                const samplers = animation.samplers
+                for (const channel of channels) {
+                    channel.sampler = samplers[channel.sampler]
+                }
+                delete animation.samplers
+            }
+        }
+
+        // meshes
+        for (const mesh of content.meshes) {
+            const primitives = mesh.primitives
+            for (const primitive of primitives) {
+                const attributes = primitive.attributes
+                for (const key in attributes) {
+                    const accessorID = attributes[key]
+                    attributes[key] = accessors[accessorID]
+                }
+                primitive.indices = accessors[primitive.indices]
+            }
+        }
+
+        //skins
+        const nodes = content.nodes
+        const skins = content.skins
+        if (skins) {
+            for (const skin of skins) {
+                skin.inverseBindMatrices = accessors[skin.inverseBindMatrices]
+
+                skin.joints = skin.joints.map(a => nodes[a])
+
+                for (let i = 0; i < skin.joints.length; i++) {
+                    skin.joints[i].id = i
+                }
+            }
+        }
+
+        // nodes
+        for (const node of nodes) {
+            if (node.mesh !== undefined) node.mesh = content.meshes[node.mesh]
+            if (node.children !== undefined) node.children = node.children.map(a => nodes[a])
+            if (node.skin !== undefined) node.skin = skins[node.skin]
+        }
+
+        // misc
+        delete content.bufferViews
+        delete content.buffers
+        delete content.asset
+        delete content.scenes
+        delete content.scene
+        // delete content.skins
+
+        console.log(content)
+
+        return content
 
         /** @type {Object.<string, {attributes: Object.<string, Float32Array>}>} */
         const result = {}
 
-        for (const scene of gltf.content.scenes) {
-            for (const node_id of scene.nodes) {
-                const node = gltf_nodes[node_id]
-                const mesh_id = node.mesh
+        for (const node of gltf_nodes) {
+            const mesh_id = node.mesh
 
-                if (mesh_id === undefined) continue
-                const node_name = node.name
+            if (mesh_id === undefined) continue
 
-                const gltf_mesh = gltf_meshes[mesh_id]
+            const skin_id = node.skin
 
-                const primitives = gltf_mesh.primitives
-
-                const attributes = []
-
-                for (const primitive of primitives) {
-                    const attribute = {}
-                    attributes.push(attribute)
-                    for (const key in primitive.attributes) {
-                        const attribute_index = primitive.attributes[key]
-                        attribute[key] = getTypedArrayFromBinary(gltf_accessors, gltf_bufferViews, gltf_uint8array, attribute_index)
-                    }
-                    attribute.indices = getTypedArrayFromBinary(gltf_accessors, gltf_bufferViews, gltf_uint8array, primitive.indices)
-                }
-
-                result[node_name] = {
-                    attibutes: attributes
-                }
+            let joints = []
+            if (skin_id !== undefined) {
+                const skin = gltf_skins[skin_id]
+                joints = skin.joints
 
             }
 
+            const node_name = node.name
+
+            const gltf_mesh = gltf_meshes[mesh_id]
+
+            const primitives = gltf_mesh.primitives
+
+            const attributes = []
+
+            for (const primitive of primitives) {
+                const attribute = {}
+                attributes.push(attribute)
+                for (const key in primitive.attributes) {
+                    const attribute_index = primitive.attributes[key]
+                    attribute[key] = getTypedArrayFromBinary(gltf_accessors, gltf_bufferViews, gltf_uint8array, attribute_index)
+                }
+                attribute.indices = getTypedArrayFromBinary(gltf_accessors, gltf_bufferViews, gltf_uint8array, primitive.indices)
+            }
+
+            result[node_name] = {
+                attibutes: attributes,
+
+            }
         }
         console.log(gltf)
         return result
     }
 }
 
-const test = async (url = new URL('./test.glb', import.meta.url)) => {
+const test = async (url = new URL('./blader.glb', import.meta.url)) => {
     const loader = new GLBLoader()
     const data = await loader.load(url)
-    console.log(data)
+    // console.log(data)
 }
 
 test()

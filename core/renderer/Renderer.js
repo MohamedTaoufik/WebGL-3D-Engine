@@ -1,21 +1,35 @@
 import { Camera } from './Camera.js'
-import { DirectionalLights } from './DirectionalLights.js'
-import { PointLights } from './PointLights.js'
+import { Lights } from './Lights.js'
 
 export const NO_BLENDING = 0
 export const NORMAL_BLENDING = 1
 export const ADDITIVE_BLENDING = 2
 export const MULTIPLY_BLENDING = 3
 
-export class Renderer {
+class TextureUnit {
+    constructor(gl) {
+        const usedTextureUnit = new Set()
+        this.getFree = () => {
+            let i = gl.TEXTURE0+1
+            while (usedTextureUnit.has(i)) i++
+            usedTextureUnit.add(i)
+            return i
+        }
+        this.delete = (unit) => {
+            usedTextureUnit.delete(unit)
+        }
+    }
+}
 
+
+export class Renderer {
     constructor() {
 
         this.canvas = document.createElement('canvas')
         const gl = this.canvas.getContext('webgl2', {
             alpha: true,
             depth: true,
-            stencil: true,
+            stencil: false,
             antialias: true,
             premultipliedAlpha: true,
             preserveDrawingBuffer: false,
@@ -26,10 +40,10 @@ export class Renderer {
 
         /** @type {Set<Program>} */
         this.programs = new Set()
-
+        this.textureUnit = new TextureUnit(gl)
         this.camera = new Camera(gl)
-        this.directional_lights = new DirectionalLights(gl)
-        this.point_lights = new PointLights(gl)
+        this.lights = new Lights(gl)
+
         const on_resize = () => {
             const width = this.canvas.clientWidth || 1
             const height = this.canvas.clientHeight || 1
@@ -51,7 +65,7 @@ export class Renderer {
         gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 
         gl.enable(gl.DEPTH_TEST)
-        gl.enable(gl.CULL_FACE)
+        // gl.enable(gl.CULL_FACE)
 
         let blending_state = NO_BLENDING
         let depth_test_enabled = true
@@ -69,16 +83,19 @@ export class Renderer {
             },
         }
 
-        this.on_before_render = new Set()
+        this.onBeforeRender = new Set()
         this.draw = (dt) => {
-            for (const cb of this.on_before_render) {
+            for (const cb of this.onBeforeRender) {
                 cb(dt)
             }
 
             if (this.camera.needsUpdate === true) {
                 this.camera.update_projectionViewMatrix()
             }
-                    
+            if (this.lights.needsUpdate === true) {
+                this.lights.update_UBO()
+            }
+
             for (const program of this.programs) {
 
                 // blending
@@ -117,8 +134,7 @@ export class Renderer {
             }
 
             this.camera.needsUpdate = false
-            this.directional_lights.needsUpdate = false
-            this.point_lights.needsUpdate = false
+            this.lights.needsUpdate = false
         }
     }
 }

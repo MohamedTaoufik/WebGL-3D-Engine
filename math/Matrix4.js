@@ -13,22 +13,6 @@ class Matrix4 {
 
         ]
 
-        this.position = new Vector3()
-        Object.defineProperties(this.position, {
-            x: {
-                get: () => this.elements[12],
-                set: (a) => { this.elements[12] = a },
-            },
-            y: {
-                get: () => this.elements[13],
-                set: (a) => { this.elements[13] = a },
-            },
-            z: {
-                get: () => this.elements[14],
-                set: (a) => { this.elements[14] = a },
-            },
-        })
-
     }
 
     set(n11, n12, n13, n14, n21, n22, n23, n24, n31, n32, n33, n34, n41, n42, n43, n44) {
