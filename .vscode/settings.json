@@ -3,7 +3,7 @@
         // "**/.gitignore": true,
         "**/.git": true,
         "**/package-lock.json": true,
-        "**/package.json": true,
+        // "**/package.json": true,
         "**/node_modules": true,
         "**/favicon.ico": true,
         "**/**.blend1": true,
