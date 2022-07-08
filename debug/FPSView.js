@@ -6,7 +6,7 @@
 
 
 
-export class FPS_View {
+export class FPSView {
     constructor(parent, updateFrame) {
         const container = document.createElement('div')
 

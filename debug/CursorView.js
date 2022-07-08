@@ -1,12 +1,13 @@
-import { CanvasRecorder } from '../utils/CanvasRecorder.js'
 
 
-
-
-
-export class Cursor_View {
-    constructor(title, callback, min = -10, max = 10, step = 0.1) {
+export class CursorView {
+    constructor(
+        parent,
+        title, callback,
+        min = -10, max = 10, step = 0.1
+    ) {
         this.container = document.createElement('div')
+        parent.appendChild(this.container)
         this.container.style.display = 'flex'
 
         const titleElement = document.createElement('span')
@@ -31,13 +32,8 @@ export class Cursor_View {
         on_input()
         input.addEventListener('input', on_input)
 
-
-        const recorder = new CanvasRecorder(renderer.canvas)
-
         const button = document.createElement('button')
         button.innerHTML = 'Record'
-
-        
     }
 }
 

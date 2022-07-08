@@ -81,15 +81,16 @@ void calcPointLights(vec3 normal, out vec3 diffuse, out vec3 specular){
 
             vec3 surfaceToPointLight_normalized = surfaceToPointLight / surfaceToPointLight_length;
 
+            float lightAttenuation  = 1. / (surfaceToPointLight_length * surfaceToPointLight_length);
+
             // diffuse
             float light = max(dot(normal, surfaceToPointLight_normalized ), 0.0);
-            float lightAttenuation  = 0.1 / (surfaceToPointLight_length * surfaceToPointLight_length);
-            diffuse += pointLights[i].diffuse * light * lightAttenuation;        
+            diffuse += 0.1 * pointLights[i].diffuse * light * lightAttenuation;        
 
             // specular
             ${QUALITY < 0 ? '' :
             `vec3 halfVector = normalize(surfaceToPointLight_normalized + surfaceToViewDirection);
-            specular += pointLights[i].diffuse * pow( max( dot(normal, halfVector), 0.0), 1000.) * lightAttenuation;`}
+            specular += pointLights[i].diffuse *  pow( max( dot(normal, halfVector), 0.0), 100.) * lightAttenuation;`}
         }
     }
 }
@@ -101,7 +102,7 @@ vec3 diffuse;
 vec3 specular;
 
 // calcDirLights(v_normal, diffuse);
-calcPointLights(v_normal, diffuse, specular);
+calcPointLights(normalize(v_normal), diffuse, specular);
 
 color.rgb = (color.rgb * 0.8 + 0.2) * (diffuse + specular);
 color.rgb = pow(color.rgb, vec3(1.0 / 2.2));

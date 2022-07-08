@@ -10,6 +10,7 @@ const uniforms = {
     u_color: Vector3,
 }
 
+
 const vertexShader = `#version 300 es
 
 ${Camera.vs_pars}

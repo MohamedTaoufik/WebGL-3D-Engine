@@ -14,15 +14,40 @@ import { Camera } from '../../core/renderer/Camera.js'
 import { Material } from "../../core/models/Material.js"
 import { Matrix4 } from "../../math/Matrix4.js"
 import { Vector3 } from "../../math/Vector3.js"
-import { Vector4 } from "../../math/Vector4.js"
-import { mat3_glsl } from '../../shader_lib/math/mat3.js'
 import { Lights } from '../../core/renderer/Lights.js'
-import { SkinTexture } from '../../core/renderer/textures/SkinTexture.js'
+import { TexParameters, UpdateParameters } from '../../core/renderer/Texture.js'
 
 const uniforms = {
     u_worldMatrix: Matrix4,
     u_color: Vector3,
-    u_jointTexture: SkinTexture
+}
+
+const textures = {
+    'u_jointTexture': {
+        createData(geometry) {
+            const length = geometry.primitives.joints.buffer.length
+            this.updateParameters.height = length / 16
+            return new Float32Array(length)
+        },
+        texParameters: new TexParameters({
+            TEXTURE_WRAP_S: 'CLAMP_TO_EDGE',
+            TEXTURE_WRAP_T: 'CLAMP_TO_EDGE',
+            TEXTURE_MIN_FILTER: 'NEAREST',
+            TEXTURE_MAG_FILTER: 'NEAREST',
+            UNPACK_PREMULTIPLY_ALPHA_WEBGL: false,
+        }),
+        updateParameters: new UpdateParameters({
+            target: 'TEXTURE_2D',
+            level: 0,
+            internalformat: 'RGBA32F',
+            width: 4,
+            height: 0,
+            border: 0,
+            format: 'RGBA',
+            type: 'FLOAT',
+        }),
+        drawLevel: 'object',
+    }
 }
 
 const vertexShader = `#version 300 es
@@ -57,8 +82,11 @@ void main() {
                         getBoneMatrix(a_joints[3]) * a_weights[3];
     // v_debug = skinMatrix[0].xyz;// vec3(a_joints.xyz);// texelFetch(u_jointTexture, ivec2(0, 0), 0).xyz;
     mat4 world = u_worldMatrix * skinMatrix;  
-    // mat4 world = u_worldMatrix;                  
-    v_normal = mat3(world) * a_normal;
+    // mat4 world = u_worldMatrix;  
+
+    
+    v_normal = normalize(vec3(inverse(transpose(world)) * vec4(a_normal, 0.0)));
+    // v_normal = mat3(world) * a_normal;
 
     vec4 position = vec4(a_position, 1.);
 
@@ -86,8 +114,6 @@ in vec3 v_debug;
 
 void main() {
     
-    
-
     color.a = 1.;
     // color.xyz = u_color;
     color.xyz = v_normal;
@@ -102,4 +128,5 @@ export const defaultSkinMaterial = new Material({
     uniforms: uniforms,
     vertexShader: vertexShader,
     fragmentShader: fragmentShader,
+    textures: textures,
 })

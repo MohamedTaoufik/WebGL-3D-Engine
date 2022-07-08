@@ -4,7 +4,10 @@
 
 const MAX_KEYFRAME = 10
 
-
+/**
+ * attempt to put all information in shader to calcul bone deformation
+ * fail at multiplying parent world matrix
+*/
 export class Skinning {
     static vs_pars = vs_pars
     static vs_main = vs_main

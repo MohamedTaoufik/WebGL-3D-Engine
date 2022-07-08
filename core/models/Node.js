@@ -4,6 +4,7 @@ import { pointMaterial } from '../../examples/materials/pointMaterial.js'
 import { Matrix4 } from '../../math/Matrix4.js'
 import { Quaternion } from '../../math/Quaternion.js'
 import { Vector3 } from '../../math/Vector3.js'
+import { Animations } from './Animations.js'
 import { Geometry, SkinnedGeometry } from './Geometry.js'
 import { Mesh } from './Mesh.js'
 import { Point } from './Point.js'
@@ -12,7 +13,7 @@ import { Skin } from './Skin.js'
 
 export class Node {
 
-    constructor(renderer, gltfNode, parent) {
+    constructor(renderer, gltfNode, material, parent) {
         this.name = gltfNode.name
 
         this.parent = parent
@@ -65,19 +66,24 @@ export class Node {
 
         this.mesh
         if (gltfNode.mesh) {
-            for (const primitive of gltfNode.mesh.primitives) {
+            // for (const primitive of gltfNode.mesh.primitives) {
+                const primitive = gltfNode.mesh.primitives[0]
                 if (primitive.attributes.WEIGHTS_0) {
-                    this.mesh = new Mesh(renderer, defaultSkinMaterial, new SkinnedGeometry(primitive), this)
+                    this.mesh = new Mesh(renderer, material ?? defaultSkinMaterial, new SkinnedGeometry(primitive), this)
                 } else {
-                    this.mesh = new Mesh(renderer, defaultMaterial, new Geometry(primitive), this)
+                    this.mesh = new Mesh(renderer, material ?? defaultMaterial, new Geometry(primitive), this)
                 }
                 if (gltfNode.skin) {
                     this.skin = new Skin(renderer, gltfNode.skin, this.mesh)
+                    if (gltfNode.skin.animations) {
+                        this.animations = new Animations(gltfNode.skin.animations, this.skin)                        
+                    }
                 }
-            }
+
+            // }
 
         } else if (gltfNode.pointCount) {
-            this.mesh = new Point(renderer, pointMaterial, gltfNode, this)
+            this.mesh = new Point(renderer, material ?? pointMaterial, gltfNode, this)
         }
 
         if (gltfNode.children !== undefined) {

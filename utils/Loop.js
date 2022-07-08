@@ -4,20 +4,31 @@
 
 export class Loop {
 
-    constructor(update, min_dt = 0.1) {
+    updatesPhysics = new Set()
+
+    constructor(update, physicsDeltaTime = 0.05, min_dt = 0.1) {
 
         let last = 0
-        const Math_min = Math.min
+        const min = Math.min
 
-        const on_raf = (now_ms) => {
-            const now_s = now_ms / 1000
-            const dt = Math_min(now_s - last, min_dt)
-            last = now_s
+        const onRaf = (now_ms) => {
+            const nowS = now_ms / 1000
+            const dt = min(nowS - last, min_dt)
+            last = nowS
+
+            this.dtPhysicsRaf += dt
+            while (this.dtPhysicsRaf > physicsDeltaTime) {
+                for (const cb of updatesPhysics) {
+                    cb(physicsDeltaTime)
+                }
+                this.dtPhysicsRaf -= physicsDeltaTime
+            }
+
 
             update(dt)
 
-            requestAnimationFrame(on_raf)
+            requestAnimationFrame(onRaf)
         }
-        requestAnimationFrame(on_raf)
+        requestAnimationFrame(onRaf)
     }
 }

@@ -1,6 +1,7 @@
 import { Matrix4 } from '../../math/Matrix4.js'
 import { Quaternion } from '../../math/Quaternion.js'
 import { Vector3 } from '../../math/Vector3.js'
+import { Texture } from '../renderer/Texture.js'
 
 
 
@@ -32,8 +33,16 @@ mat4 world = u_world * skinMatrix;
 class Bone {
     constructor(joint, jointMatrices, inverseBindMatrices, parent) {
 
+        this.name = joint.name
         this.parent = parent
         const children = []
+
+        this.traverse = (callback) => {
+            callback(this)
+            for (const child of children) {
+                child.traverse(callback)
+            }
+        }
 
         this.worldMatrix = new Matrix4()
 
@@ -61,7 +70,7 @@ class Bone {
             if (parent && parentUpdate) parent.update(true, false)
 
             this.worldMatrix.compose(this.position, this.quaternion, this.scale)
-            if (parent)  this.worldMatrix.premultiply(parent.worldMatrix)
+            if (parent) this.worldMatrix.premultiply(parent.worldMatrix)
             this.boneMatrix.copy(this.worldMatrix).multiply(this.inverseBindMatrix)
 
             if (childUpdate === true) {
@@ -73,6 +82,7 @@ class Bone {
             }
         }
     }
+
 }
 
 export class Skin {
@@ -85,24 +95,22 @@ export class Skin {
     constructor(renderer, gltfSkin, mesh) {
 
         const inverseBindMatrices = gltfSkin.inverseBindMatrices.buffer
-        const jointMatrices = new Float32Array(gltfSkin.joints.length * 16)
-        const root = new Bone(gltfSkin.joints[0], jointMatrices, inverseBindMatrices)
 
         const gl = renderer.gl
-        const texture = gl.createTexture()
-        gl.bindTexture(gl.TEXTURE_2D, texture)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+        const tex = mesh.textures['u_jointTexture']
+        // const tex = new Texture(renderer, 'u_jointTexture', jointMatrices)
+        const jointMatrices = tex.data
+        // new Float32Array(gltfSkin.joints.length * 16)
+
+        this.root = new Bone(gltfSkin.joints[0], jointMatrices, inverseBindMatrices)
 
         this.update = () => {
-            root.update()
-            gl.bindTexture(gl.TEXTURE_2D, texture)
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, 4, gltfSkin.joints.length, 0,
-                gl.RGBA, gl.FLOAT, jointMatrices)
-            mesh.bindTexture('u_jointTexture', texture)
+            this.root.update()
+            tex.needsDataUpdate = true
         }
+
+        mesh.onBeforeDraw = this.update
         this.update()
     }
 }

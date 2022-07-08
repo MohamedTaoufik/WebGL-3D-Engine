@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="100px"
+   height="100px"
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="SVGRoot"
+   sodipodi:docname="texture4.svg"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview829"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="px"
+     showgrid="false"
+     inkscape:zoom="4"
+     inkscape:cx="66"
+     inkscape:cy="150.375"
+     inkscape:window-width="2560"
+     inkscape:window-height="1361"
+     inkscape:window-x="2391"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs824">
+    <filter
+       inkscape:collect="always"
+       style="color-interpolation-filters:sRGB"
+       id="filter7899"
+       x="-0.3777714"
+       y="-0.39351188"
+       width="1.7555428"
+       height="1.7870238">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="8.854017"
+         id="feGaussianBlur7901" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <ellipse
+       style="mix-blend-mode:normal;fill:#08fff9;fill-rule:evenodd;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;paint-order:stroke markers fill;filter:url(#filter7899);fill-opacity:1"
+       id="path7817"
+       cx="50.125"
+       cy="49.5"
+       rx="28.125"
+       ry="27" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:122.306px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:3.05765"
+       x="12.294881"
+       y="92.634453"
+       id="text2037"
+       transform="scale(0.96746166,1.0336327)"><tspan
+         sodipodi:role="line"
+         x="12.294881"
+         y="92.634453"
+         style="fill:#000000;fill-opacity:1;stroke-width:3.05765"
+         id="tspan1124">4</tspan></text>
+  </g>
+</svg>

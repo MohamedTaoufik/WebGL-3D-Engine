@@ -10,7 +10,7 @@ class TextureUnit {
     constructor(gl) {
         const usedTextureUnit = new Set()
         this.getFree = () => {
-            let i = gl.TEXTURE0+1
+            let i = gl.TEXTURE0 + 1
             while (usedTextureUnit.has(i)) i++
             usedTextureUnit.add(i)
             return i

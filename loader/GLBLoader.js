@@ -34,8 +34,6 @@ class GLBinaryData {
 
         const chunkContentsLength = this.header.length - BINARY_EXTENSION_HEADER_LENGTH
 
-
-
         const chunkView = new DataView(data, BINARY_EXTENSION_HEADER_LENGTH)
         let chunkIndex = 0
 
@@ -83,17 +81,6 @@ const TYPE_CLASS = {
     '5126': Float32Array, // gl.FLOAT
 }
 
-const getTypedArrayFromBinary = (accessors, bufferViews, binary, indice) => {
-    const accessor = accessors[indice]
-    const bufferView = bufferViews[indice]
-    return new TYPE_CLASS[accessor.componentType](
-        binary.slice(
-            bufferView.byteOffset,
-            bufferView.byteOffset + bufferView.byteLength,
-        ).buffer
-    )
-}
-
 export class GLBLoader {
 
     /**
@@ -108,10 +95,10 @@ export class GLBLoader {
         )
 
         const gltf = new GLBinaryData(bin.buffer)
-        console.log(gltf)
 
         const body = gltf.body
         const content = gltf.content
+        const nodes = content.nodes
 
         // accessors
         const accessors = content.accessors
@@ -127,14 +114,31 @@ export class GLBLoader {
 
         // animation
         if (content.animations) {
+            const animations = {}
             for (const animation of content.animations) {
                 const channels = animation.channels
                 const samplers = animation.samplers
+
+                const bones = {}
                 for (const channel of channels) {
-                    channel.sampler = samplers[channel.sampler]
+                    const sampler = samplers[channel.sampler]
+                    const target = channel.target
+                    // channel.sampler = sampler
+
+                    const name = nodes[channel.target.node].name
+                    if (bones[name] === undefined) bones[name] = {}
+                    bones[name][channel.target.path] = {
+                        key: accessors[sampler.input].buffer,
+                        frame: accessors[sampler.output].buffer,
+                        frameType: accessors[sampler.output].type,
+                        interpolation: sampler.interpolation,
+                    }
                 }
+
+                animations[animation.name] = bones
                 delete animation.samplers
             }
+            content.animations = animations
         }
 
         // meshes
@@ -151,16 +155,27 @@ export class GLBLoader {
         }
 
         //skins
-        const nodes = content.nodes
         const skins = content.skins
+
         if (skins) {
             for (const skin of skins) {
+                skin.animations = {}
                 skin.inverseBindMatrices = accessors[skin.inverseBindMatrices]
-
                 skin.joints = skin.joints.map(a => nodes[a])
-
                 for (let i = 0; i < skin.joints.length; i++) {
-                    skin.joints[i].id = i
+                    const joint = skin.joints[i]
+                    joint.id = i
+
+                    for (const animationName in content.animations) {
+                        const animation = content.animations[animationName]
+                        for (const boneName in animation) {
+                            if (boneName === joint.name) {
+                                skin.animations[animationName] = animation
+                                break
+                            }
+                        }
+                    }
+
                 }
             }
         }
@@ -180,69 +195,6 @@ export class GLBLoader {
         delete content.scene
         // delete content.skins
 
-        console.log(content)
-
         return content
-
-        /** @type {Object.<string, {attributes: Object.<string, Float32Array>}>} */
-        const result = {}
-
-        for (const node of gltf_nodes) {
-            const mesh_id = node.mesh
-
-            if (mesh_id === undefined) continue
-
-            const skin_id = node.skin
-
-            let joints = []
-            if (skin_id !== undefined) {
-                const skin = gltf_skins[skin_id]
-                joints = skin.joints
-
-            }
-
-            const node_name = node.name
-
-            const gltf_mesh = gltf_meshes[mesh_id]
-
-            const primitives = gltf_mesh.primitives
-
-            const attributes = []
-
-            for (const primitive of primitives) {
-                const attribute = {}
-                attributes.push(attribute)
-                for (const key in primitive.attributes) {
-                    const attribute_index = primitive.attributes[key]
-                    attribute[key] = getTypedArrayFromBinary(gltf_accessors, gltf_bufferViews, gltf_uint8array, attribute_index)
-                }
-                attribute.indices = getTypedArrayFromBinary(gltf_accessors, gltf_bufferViews, gltf_uint8array, primitive.indices)
-            }
-
-            result[node_name] = {
-                attibutes: attributes,
-
-            }
-        }
-        console.log(gltf)
-        return result
     }
 }
-
-const test = async (url = new URL('./blader.glb', import.meta.url)) => {
-    const loader = new GLBLoader()
-    const data = await loader.load(url)
-    // console.log(data)
-}
-
-test()
-
-
-
-
-
-
-
-
-
-

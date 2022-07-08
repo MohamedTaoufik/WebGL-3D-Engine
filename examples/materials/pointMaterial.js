@@ -2,19 +2,31 @@
 import { Camera } from '../../core/renderer/Camera.js'
 import { Lights } from '../../core/renderer/Lights.js'
 import { Material } from "../../core/models/Material.js"
-import { ADDITIVE_BLENDING } from '../../core/renderer/Renderer.js' 
+import { ADDITIVE_BLENDING } from '../../core/renderer/Renderer.js'
 import { Matrix4 } from "../../math/Matrix4.js"
 import { Vector3 } from "../../math/Vector3.js"
-import { Vector4 } from "../../math/Vector4.js"
-import { mat3_glsl } from '../../shader_lib/math/mat3.js'
+import { TexParameters, UpdateParameters } from '../../core/renderer/Texture.js'
 
 const uniforms = {
     u_worldMatrix: Matrix4,
     u_color: Vector3,
-    texture1: Image,
+}
+
+const textures = {
+    'texture1': {
+        createData() {
+            const img = new Image()
+            img.src = new URL('./texture1.svg', import.meta.url).href
+            return img
+        },
+        texParameters: new TexParameters(),
+        updateParameters: new UpdateParameters(),
+        drawLevel: 'object',
+    }
 }
 
 const init = () => {
+
     // return new Promise((resolve) => {
     //     uniforms.texture1.onload = resolve
     //     uniforms.texture1.src = new URL('./spark.svg', import.meta.url).href
@@ -65,16 +77,15 @@ void main() {
 }
 `
 
-export const pointMaterial = new Material(
-    {
-        uniforms: uniforms,
-        vertexShader: vertexShader,
-        fragmentShader: fragmentShader,
-        init: init,
-        destroy: destroy,
-        blending: ADDITIVE_BLENDING,
-        depth_test: true,
-        depthWrite: false,
-    }
-)
+export const pointMaterial = new Material({
+    uniforms: uniforms,
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
+    init: init,
+    destroy: destroy,
+    blending: ADDITIVE_BLENDING,
+    depth_test: true,
+    depthWrite: false,
+    textures: textures,
+})
 

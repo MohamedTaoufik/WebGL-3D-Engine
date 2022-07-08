@@ -1,3 +1,4 @@
+import { Texture } from './Texture.js'
 
 
 
@@ -55,7 +56,6 @@ export class VAO {
             gl.bufferSubData(gl.ARRAY_BUFFER, 0, object_attributes[attribute_name], 0)
         }
 
-
         let indexBuffer
         if (geometry.indices !== undefined) {
             indexBuffer = gl.createBuffer()
@@ -64,7 +64,20 @@ export class VAO {
 
         }
 
+        const textures = []
+        this.textures = {}
+        const programTextureDictionary = program.programTextureDictionary
+        for (const key in program.material.textures) {
+            const texture = program.material.textures[key]
+            if (texture.drawLevel === 'vao') {
+                const tex = new Texture(gl, key, texture.createData(geometry), texture.texParameters, texture.updateParameters)
+                this.textures[key]
+                textures.push(tex)
+            }
+        }
+
         this.draw = (dt) => {
+            for (const texture of textures) texture.draw(programTextureDictionary)
             for (const object of this.meshes) {
                 object.draw(dt)
             }
@@ -73,6 +86,7 @@ export class VAO {
         instances.set(geometry, this)
         program.vaos.add(this)
         this.dispose = () => {
+            textures.length = 0
             if (this.meshes.size !== 0) {
                 console.warn(`try to dispose VAO but there are still meshes.`)
             } else {

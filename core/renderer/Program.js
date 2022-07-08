@@ -2,9 +2,9 @@ import { Matrix4 } from '../../math/Matrix4.js'
 import { Vector2 } from '../../math/Vector2.js'
 import { Vector3 } from '../../math/Vector3.js'
 import { Vector4 } from '../../math/Vector4.js'
-import { SkinTexture } from './textures/SkinTexture.js'
+import { Texture } from './Texture.js'
 
-let textureCount = 0
+
 const instances = new Map()
 export class Program {
 
@@ -37,39 +37,42 @@ export class Program {
 
         this.vaos = new Set()
 
+        const textures = []
+
         this.draw = (dt) => {
 
             gl.useProgram(this.program)
+
+            for (const texture of textures) texture.draw(this.programTextureDictionary)
 
             for (const vao of this.vaos) {
                 gl.bindVertexArray(vao.vao)
                 vao.draw(dt)
             }
         }
-        // init uniforms
+
         this.uniformSetters = {}
-
-        const uniformTextureDictionary = {}
-
-        this.bindTexture = (uniformName, texture) => {
-            gl.activeTexture(uniformTextureDictionary[uniformName])
-            gl.bindTexture(gl.TEXTURE_2D, texture)
-        }
+        this.programTextureDictionary = {}
 
         for (const uniform in material.uniforms) {
             const type = material.uniforms[uniform]
             const location = gl.getUniformLocation(this.program, uniform)
 
-            if (type === HTMLImageElement || type === Image || type === SkinTexture) {
+            this.uniformSetters[uniform] = glUniformType[type](gl, location)
+        }
 
-                gl.activeTexture(gl[`TEXTURE${textureCount}`])
-                uniformTextureDictionary[uniform] = gl[`TEXTURE${textureCount}`]
-                gl.uniform1i(location, textureCount)
-                textureCount++
+        let textureCount = 0
+        for (const key in material.textures) {
+            const location = gl.getUniformLocation(this.program, key)
+            this.programTextureDictionary[key] = gl[`TEXTURE${textureCount}`]
+            gl.uniform1i(location, textureCount)
+            textureCount++
 
-            } else {
-                this.uniformSetters[uniform] = gl_uniform_type[type](gl, location)
-                // this.uniform_setters[uniform](uniform_data)
+            const texture = material.textures[key]
+            if (texture.drawLevel === 'program') {
+                const tex = new Texture(gl, key, texture.createData(geometry), texture.texParameters, texture.updateParameters)
+                this.textures[key]
+                textures.push(tex)
             }
         }
 
@@ -80,6 +83,7 @@ export class Program {
         instances.set(material, this)
         renderer.programs.add(this)
         this.dispose = () => {
+            textures.length = 0
             if (this.vaos.size !== 0) {
                 console.warn(`try to dispose program but there are still VAOs.`)
             } else {
@@ -96,7 +100,7 @@ const vector_3_typed_array = new Float32Array(3)
 const vector_4_typed_array = new Float32Array(4)
 const matrix_4_typed_array = new Float32Array(16)
 
-const gl_uniform_type = {
+const glUniformType = {
     [Number]: (gl, location) => (value) => {
         gl.uniform1f(location, value)
     },

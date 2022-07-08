@@ -72,33 +72,32 @@ export class OrbitControls {
 
         const pan = new Vector2()
 
-        const vertical_metric = new Vector3()
-        const horizontal_metric = new Vector3()
+        const verticalScreen = new Vector3()
+        const horizontalScreen = new Vector3()
 
-        const update = (dt) => {
-            // const dt = Math.min(THR.dt * 5, 1)
-
+        const update = () => {
             if (camera.needsUpdate !== true) return
 
             if (pan.x !== 0 || pan.y !== 0) {
 
                 direction.subVectors(cam_p, target)
-                const dir_length = direction.length()
 
                 // cross vectors simplified
-                horizontal_metric.crossVectors(direction, _up).normalize()
+                horizontalScreen.crossVectors(direction, _up).normalize()
+                verticalScreen.crossVectors(horizontalScreen, direction).normalize()
 
-                vertical_metric.crossVectors(horizontal_metric, direction).normalize()
+                pan.multiplyScalar(0.01)
 
-                pan.multiplyScalar(0.1)
+                horizontalScreen.multiplyScalar(pan.x)
+                verticalScreen.multiplyScalar(pan.y)
 
-                horizontal_metric.multiplyScalar(pan.x)
-                vertical_metric.multiplyScalar(pan.y)
-
-                target.add(horizontal_metric)
-                    .add(vertical_metric)
+                target.add(horizontalScreen)
+                    .add(verticalScreen)
             }
 
+            if (spherical.radius < 0.1) spherical.radius = 0.1
+            if (spherical.phi > -0.1) spherical.phi = -0.1
+            else if (spherical.phi < -3) spherical.phi = -3
             direction.setFromSpherical(spherical)
 
             cam_p.copy(target).add(direction)
@@ -107,18 +106,17 @@ export class OrbitControls {
 
         }
 
-        const last_mouse_position = new Vector2()
+        const lastMousePosition = new Vector2()
 
         const on_pointermove = (e) => {
             if (e.buttons === 1) {
-                spherical.phi += (e.clientY - last_mouse_position.y) / 100
-                spherical.theta += (last_mouse_position.x - e.clientX) / 100
-
+                spherical.phi += (e.clientY - lastMousePosition.y) / 100
+                spherical.theta += (lastMousePosition.x - e.clientX) / 100
             } else {
-                pan.set(e.clientX, e.clientY)
-                    .sub(last_mouse_position)
+                pan.x += e.clientX - lastMousePosition.x
+                pan.y += e.clientY - lastMousePosition.y
             }
-            last_mouse_position.set(e.clientX, e.clientY)
+            lastMousePosition.set(e.clientX, e.clientY)
             camera.needsUpdate = true
         }
 
@@ -129,7 +127,7 @@ export class OrbitControls {
         addEventListener('wheel', on_wheel)
 
         const on_pointerdown = (e) => {
-            last_mouse_position.set(e.clientX, e.clientY)
+            lastMousePosition.set(e.clientX, e.clientY)
             domElement.setPointerCapture(e.pointerId)
             domElement.addEventListener('pointermove', on_pointermove)
         }
